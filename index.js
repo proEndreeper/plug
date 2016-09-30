@@ -240,7 +240,7 @@ Plugger.prototype.find = function(pluginPath) {
               
               function callback(result) {
                 var res = result===undefined?loadResult:result;
-                cb(res!==false);
+                cb(null,res!==false);
               }
               
               if(activePlugin && !(activePlugin.state & PluginState.LOADED)) {
