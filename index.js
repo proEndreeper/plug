@@ -43,7 +43,7 @@ Plugger.prototype.activate = function(pluginName, plugin, modulePath, data) {
 Plugger.prototype.deactivate = function(pluginName,cb,doDrop) {
   if(this.pluginsLoaded.indexOf(pluginName)==-1) {
     debug('!! DISCONNECT: plugin "' + pluginName + '" is not loaded!');
-    cb(false);
+    cb(null,false);
     return;
   }
   var activePlugin = this.plugins[pluginName],
@@ -58,10 +58,10 @@ Plugger.prototype.deactivate = function(pluginName,cb,doDrop) {
       activePlugin.state = PluginState.INACTIVE;
       if(doDrop) {
         loader.drop(pluginName);
-        return cb(result);
+        return cb(null,result);
       }
     }
-    cb(result);
+    cb(null,result);
     loader.emit('disconnect',pluginName,result);
   }
   
@@ -137,12 +137,12 @@ Plugger.prototype.connect = function(callback) {
         connectArgs = loader.args;
     
     if(!activePlugin) {
-      return cb(false);
+      return cb(null,false);
     }
     
     var plugin = activePlugin.module;
     if(!plugin.connect) {
-      return cb(false);
+      return cb(null,false);
     }
     
     var haveCallback = plugin.connect.length > loader.args.length,
@@ -150,12 +150,12 @@ Plugger.prototype.connect = function(callback) {
     
     function callback(pluginData) {
         if(activePlugin.state>0) {
-          return cb(true);
+          return cb(null,true);
         }
         activePlugin.state = PluginState.ACTIVE;
         activePlugin.data = pluginData===undefined?connectResult:pluginData;
         loader.emit('connect',pluginName, pluginData || connectResult, activePlugin.path);
-        cb(true);
+        cb(null,true);
     }
 
     // if the function has a callback parameter, then append the callback arg
@@ -216,7 +216,7 @@ Plugger.prototype.find = function(pluginPath) {
   
     function loadPlugin(modulePath,cb) {
       loader.load(modulePath);
-      cb(true);
+      cb(null,true);
     }
     
     debug('looking for app plugins in: ' + pluginPath);
