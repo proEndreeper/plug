@@ -224,6 +224,7 @@ Plugger.prototype.find = function(pluginPath) {
         var arr = (files || []);
         var queue = [];
         for(var i=0;i<arr.length;i++) {
+          if(path.extname(arr[i])!=".js") continue;
           queue.push(path.join(pluginPath, arr[i]));
         }
         cps.pmap(queue,loadPlugin,function(err,results) {
