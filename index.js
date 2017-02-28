@@ -230,8 +230,7 @@ Plugger.prototype.count = function() {
   return this.pluginsLoaded.length;
 };
 
-Plugger.prototype.loadFileQueue = function(queue) {
-  var id = Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
+Plugger.prototype.loadFileQueue = function(queue,cb) {
   var loader = this;
 
   function loadPlugin(modulePath, cb) {
@@ -251,7 +250,7 @@ Plugger.prototype.loadFileQueue = function(queue) {
           loadResult;
 
         function callback(result) {
-          var res = result === undefined ? loadResult : result;
+          var res = (result === undefined ? loadResult : result);
           cb(null, res !== false);
         }
 
@@ -277,17 +276,17 @@ Plugger.prototype.loadFileQueue = function(queue) {
       }, function(err, results) {
         if (err) {
           loader.emit('error', err);
-          return;
+          if(typeof cb == "function") cb(err,null);
+        } else {
+          var bool = true;
+          for (var i = 0; i < results.length; i++) {
+            bool = bool && results[i];
+          }
+          if(typeof cb == "function") cb(null,bool);
         }
-        var bool = true;
-        for (var i = 0; i < results.length; i++) {
-          bool = bool && results[i];
-        }
-        loader.emit('queue_done', id, bool && success);
       });
     })
   });
-  return id;
 }
 
 Plugger.prototype.find = function(pluginPath) {
@@ -301,15 +300,9 @@ Plugger.prototype.find = function(pluginPath) {
       if (path.extname(arr[i]) == ".disabled") continue;
       queue.push(path.join(pluginPath, arr[i]));
     }
-    var id;
-    loader.on('queue_done',(qid,success)=>{
-      if(id===undefined) return;
-      if(qid==id) {
-        loader.emit("connected",success);
-        id = undefined;
-      }
+    loader.loadFileQueue(queue,(err,success)=>{
+      loader.emit("connected",success);
     });
-    id = loader.loadFileQueue(queue);
   });
 };
 
@@ -344,19 +337,10 @@ Plugger.prototype.reactivate = function(plName, cb) {
     debug("!! REACTIVATE: '"+plName+"' doesn't exist!");
     return;
   }
-  var id;
   
   if(typeof(cb)=="function") {
-    loader.on('queue_done',(qid,success)=>{
-      if(id===undefined) return;
-      if(qid==id) {
-        cb(null,success);
-        id = undefined;
-      }
-    });
+    loader.loadFileQueue([plPath],cb);
   }
-  
-  id = loader.loadFileQueue([plPath]);
 };
 
 exports.create = function() {
