@@ -28,6 +28,13 @@ Object.defineProperty(Plugger, "PluginState", {
 
 util.inherits(Plugger, events.EventEmitter);
 
+Plugger.prototype.getPluginPath = function(plName) {
+  if(this.pluginPaths.has(plName)) {
+    return this.pluginPaths.get(plName);
+  }
+  return null;
+};
+
 Plugger.prototype.activate = function(pluginName, plugin, modulePath, data) {
   if (this.plugins[pluginName]) {
     debug('!! CONNECT: plugin by name of "' + pluginName + '" already exists!');
@@ -138,8 +145,6 @@ Plugger.prototype.drop = function(pluginName) {
     delete this.plugins[pluginName];
   }
 };
-
-Plugger.Prot
 
 Plugger.prototype.connect = function(callback) {
   var loader = this,
