@@ -83,7 +83,7 @@ Plugger.prototype.deactivate = function(pluginName, cb, doDrop) {
     loader.emit('disconnect', pluginName, result);
   }
 
-  if (!(activePlugin.state & PluginState.ACTIVE)) {
+  if (activePlugin.state!=PluginState.ACTIVE) {
     debug('!! DISCONNECT: plugin "' + pluginName + '" seems to be loaded, but is not active!');
     return deactivatePlugin(false);
   }
@@ -254,7 +254,7 @@ Plugger.prototype.loadFileQueue = function(queue,cb) {
           cb(null, res !== false);
         }
 
-        if (activePlugin && !(activePlugin.state & PluginState.LOADED)) {
+        if (activePlugin && activePlugin.state != PluginState.LOADED) {
           var plugin = activePlugin.module;
           var func = plugin.load || plugin.prepare;
           if (func) {
