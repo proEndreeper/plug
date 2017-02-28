@@ -76,11 +76,11 @@ Plugger.prototype.deactivate = function(pluginName, cb, doDrop) {
       activePlugin.state = PluginState.INACTIVE;
       if (doDrop) {
         loader.drop(pluginName);
-        return cb(null, result);
       }
     }
     cb(null, result);
     loader.emit('disconnect', pluginName, result);
+    if(doDrop) return;
   }
 
   if (activePlugin.state!=PluginState.ACTIVE) {
